@@ -1,3 +1,4 @@
+--- Copyright ©2018 The Australian National University, All rights reserved
 module Main where
 
 import CodeWorld (interactionOf)
