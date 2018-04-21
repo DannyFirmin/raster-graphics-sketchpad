@@ -1,4 +1,4 @@
---- Copyright ©2018 The Australian National University, All rights reserved
+--- Copyright 2018 The Australian National University, All rights reserved
 module Controller where
 
 import CodeWorld hiding (Point)
