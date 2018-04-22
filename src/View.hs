@@ -5,18 +5,18 @@ import CodeWorld hiding (Point)
 import Data.Text (pack)
 import Model
 
+-- a pixel coordinate is a pair of Int
 type Coord = (Int, Int)
 
--- a pixel coordinate is a pair of Int
+-- a pixel value is some shade of grey (0.0 == white, 1.0 = black)
 type Shade = Double
 
--- a pixel value is some shade of grey (0.0 == white, 1.0 = black)
+-- a raster pixel is represented by a coordinate and a shade
 type Pixel = (Coord, Shade)
 
--- a raster pixel is represented by a coordinate and a shade
+-- a raster is a list of pixels
 type Raster = [Pixel]
 
--- a raster is a list of pixels
 coordToPoint :: Resolution -> Coord -> Point
 coordToPoint z (x, y) = (x', y')
   where
