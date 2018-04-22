@@ -17,9 +17,9 @@ executable ClickToRaster
   main-is:             Main.hs
 
   other-modules:
+      View,
       Controller,
-      Model,
-      View
+      Model
 
   build-depends:
       base                 >= 4.10.1 && < 4.11,
