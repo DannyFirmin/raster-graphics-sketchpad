@@ -95,7 +95,7 @@ polyLineRaster = undefined -- TODO
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
 -- Antialias if smooth is true.
 -- Examples:
--- >>> sort $ circleRaster False (0,0) (1,1)
+-- >>> sort $ circleRaster False (0,0) (0,1)
 -- [((-1,0),1.0),((0,-1),1.0),((0,1),1.0),((1,0),1.0)]
 circleRaster :: Smooth -> Coord -> Coord -> Raster
 circleRaster = undefined -- TODO
