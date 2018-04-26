@@ -17,6 +17,9 @@ type Pixel = (Coord, Shade)
 -- a raster is a list of pixels
 type Raster = [Pixel]
 
+-- $setup
+-- >>> import Data.List (sort)
+
 coordToPoint :: Resolution -> Coord -> Point
 coordToPoint z (x, y) = (x', y')
   where
@@ -61,7 +64,6 @@ pointRaster p = [(p, 1)]
 
 -- | A raster for the rectangle with corner coordinates (x1,y1) and (x2,y2)
 -- Examples:
--- >>> import Data.List(sort)
 -- >>> sort $ rectangleRaster (-1,-1) (1,1)
 -- [((-1,-1),1.0),((-1,0),1.0),((-1,1),1.0),((0,-1),1.0),((0,1),1.0),((1,-1),1.0),((1,0),1.0),((1,1),1.0)]
 rectangleRaster :: Coord -> Coord -> Raster
@@ -70,7 +72,6 @@ rectangleRaster = undefined -- TODO
 -- | A raster for the line with end coordinates given as arguments.
 -- Antialias if smooth is true.
 -- Examples:
--- >>> import Data.List(sort)
 -- >>> sort $ lineRaster False (-1,-1) (1,1)
 -- [((-1,-1),1.0),((0,0),1.0),((1,1),1.0)]
 --
@@ -82,9 +83,10 @@ lineRaster = undefined -- TODO
 -- | A raster for the polyline with vertices vs.
 -- Antialias if smooth is true.
 -- Examples:
--- >>> import Data.List(sort)
 -- >>> sort $ polyLineRaster False [(0,0),(2,2)]
 -- [((0,0),1.0),((1,1),1.0),((2,2),1.0)]
+-- >>> sort $ polyLineRaster False [(0,0),(1,1),(0,1)]
+-- [((0,0),1.0),((0,1),1.0),((1,1),1.0)]
 --
 -- prop> lineRaster False a b == polyLineRaster False [a, b]
 polyLineRaster :: Smooth -> [Coord] -> Raster
@@ -93,8 +95,7 @@ polyLineRaster = undefined -- TODO
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
 -- Antialias if smooth is true.
 -- Examples:
--- >>> import Data.List(sort)
 -- >>> sort $ circleRaster False (0,0) (1,1)
--- [((-1,0),1.0),((-1,0),1.0),((0,-1),1.0),((0,-1),1.0),((0,1),1.0),((0,1),1.0),((1,0),1.0),((1,0),1.0)]
+-- [((-1,0),1.0),((0,-1),1.0),((0,1),1.0),((1,0),1.0)]
 circleRaster :: Smooth -> Coord -> Coord -> Raster
 circleRaster = undefined -- TODO
