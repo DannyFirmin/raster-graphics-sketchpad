@@ -52,6 +52,8 @@ shapeToRaster :: Resolution -> Smooth -> Shape -> Raster
 shapeToRaster z s shape =
   case shape of
     Point p1 -> pointRaster $ pointToCoord z p1
+    Rectangle p1 p2 -> rectangleRaster (pointToCoord z p1) (pointToCoord z p2)
+    Line p1 p2 -> lineRaster s (pointToCoord z p1) (pointToCoord z p2)
     -- TODO: add cases for rectangles, lines, polygons, and circles
     _ -> []
 
@@ -67,7 +69,17 @@ pointRaster p = [(p, 1)]
 -- >>> sort $ rectangleRaster (-1,-1) (1,1)
 -- [((-1,-1),1.0),((-1,0),1.0),((-1,1),1.0),((0,-1),1.0),((0,1),1.0),((1,-1),1.0),((1,0),1.0),((1,1),1.0)]
 rectangleRaster :: Coord -> Coord -> Raster
-rectangleRaster = undefined -- TODO
+-- rectangleRaster (x1,y1) (x2,y2) = zip([x1,y1] [x2,y2])
+rectangleRaster (x1,y1) (x2,y2) =
+    zip (zip [(min x1 x2)..(max x1 x2)] [y1,y1..]
+  ++ zip [(min x1 x2)..(max x1 x2)] [y2,y2..]
+  ++ zip [x1,x1..] [(min y1 y2)..(max y1 y2)]
+  ++ zip [x2,x2..] [(min y1 y2)..(max y1 y2)]) [1,1..]
+
+-- rectangleRaster (x1,y1) (x2,y2) = [((x,y),1)|x<-[x1,x1..],y<-[minimum(y1,y2)..maximum(y1,y2)]]
+--   ++[((x,y),1)|x<-[x2,x2..],y<-[minimum(y1,y2)..maximum(y1,y2)]]
+--   ++[((x,y),1) |x<-[minimum(x1,x2)..maximum(x1,x2)],y<-[y1,y1..]]
+--   ++[((x,y),1) |x<-[minimum(x1,x2)..maximum(x1,x2)],y<-[y2,y2..]]
 
 -- | A raster for the line with end coordinates given as arguments.
 -- Antialias if smooth is true.
@@ -77,8 +89,25 @@ rectangleRaster = undefined -- TODO
 --
 -- prop> a == (fst $ head $ lineRaster False a b)
 -- prop> b == (fst $ last $ lineRaster False a b)
+
 lineRaster :: Smooth -> Coord -> Coord -> Raster
-lineRaster = undefined -- TODO
+lineRaster s (x0,y0) (x1,y1) = [((x1,y1),1)]
+  where dx = x1 - x0
+        dy = y1 - y0
+        d = 2*dy-dx
+
+-- balancedWord :: Int -> Int -> Int -> [Int]
+-- balancedWord p q eps | eps + p < q = 0 : balancedWord p q (eps + p)
+-- balancedWord p q eps               = 1 : balancedWord p q (eps + p - q)
+
+-- lineRaster s (x0,y0) (x1,y1) =
+--   let (dx, dy) = (x1 - x0, y1 - y0)
+--       xyStep b (x, y) = (x + signum dx,     y + signum dy * b)
+--       yxStep b (x, y) = (x + signum dx * b, y + signum dy)
+--       (p, q, step) | abs dx > abs dy = (abs dy, abs dx, xyStep)
+--                    | otherwise       = (abs dx, abs dy, yxStep)
+--       walk w xy = xy : walk (tail w) (step (head w) xy)
+--   in  zip (walk (balancedWord p q 0) (x0, y0)) [1,1..]
 
 -- | A raster for the polyline with vertices vs.
 -- Antialias if smooth is true.
