@@ -121,9 +121,10 @@ bresenHam dx dy
 -- prop> lineRaster False a b == polyLineRaster False [a, b]
 polyLineRaster :: Smooth -> [Coord] -> Raster
 polyLineRaster _ [] = []
-polyLineRaster z (p1:p2:ps) = lineRaster z p1 p2 ++ polyLineRaster z ps
-polyLineRaster z (p1:p2:p3:ps) = lineRaster z p2 p3 ++ polyLineRaster z ps
-polyLineRaster z a = lineRaster z (head a) (last a)
+polyLineRaster z (p1:p2:ps) = polyHeadnLast++lineRaster z p1 p2 ++ polyLineRaster z (p2:ps)
+
+polyHeadnLast::[Coord] -> Raster
+polyHeadnLast (p1:p2:ps) = lineRaster (head(p1:p2:ps)) (last(p1:p2:ps))
 
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
 -- Antialias if smooth is true.
