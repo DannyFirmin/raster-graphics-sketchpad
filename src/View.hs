@@ -54,9 +54,13 @@ shapeToRaster z s shape =
     Point p1 -> pointRaster $ pointToCoord z p1
     Rectangle p1 p2 -> rectangleRaster (pointToCoord z p1) (pointToCoord z p2)
     Line p1 p2 -> lineRaster s (pointToCoord z p1) (pointToCoord z p2)
+    Polygon p -> polyLineRaster s (polygonCord z p)
     -- TODO: add cases for rectangles, lines, polygons, and circles
     _ -> []
 
+polygonCord :: Resolution -> [Point] -> [Coord]
+polygonCord z [] = []
+polygonCord z (p:ps) = pointToCoord z p: (polygonCord z ps)
 -- | A raster for the point p
 -- Examples:
 -- >>> pointRaster (1,1)
@@ -91,23 +95,20 @@ rectangleRaster (x1,y1) (x2,y2) =
 -- prop> b == (fst $ last $ lineRaster False a b)
 
 lineRaster :: Smooth -> Coord -> Coord -> Raster
-lineRaster s (x0,y0) (x1,y1) = [((x1,y1),1)]
-  where dx = x1 - x0
-        dy = y1 - y0
-        d = 2*dy-dx
+lineRaster _ (x1,y1) (x2,y2) = zip [(x1+x,y1+y) | (x,y) <- bresenHam dx dy][1,1..]
+  where dx= x2 - x1; dy= y2 - y1
 
--- balancedWord :: Int -> Int -> Int -> [Int]
--- balancedWord p q eps | eps + p < q = 0 : balancedWord p q (eps + p)
--- balancedWord p q eps               = 1 : balancedWord p q (eps + p - q)
+bresenHam :: Integral a => a -> a -> [(a, a)]
+bresenHam dx dy
+    | dx  <  0  = [(-x, y) | (x, y) <- bresenHam (abs dx) dy]
+    | dy <  0  = [(x, -y) | (x, y) <- bresenHam dx (abs dy)]
+    | dy > dx = [(x,  y) | (y, x) <- bresenHam dy dx]
+    | otherwise  = zip [0..dx] (map fst (iterate step (0, dx `div` 2)))
+    where
+        step (y, e)
+            | e-dy < 0 = (y + 1, (e-dy) + dx)
+            | otherwise  = (y, e-dy)
 
--- lineRaster s (x0,y0) (x1,y1) =
---   let (dx, dy) = (x1 - x0, y1 - y0)
---       xyStep b (x, y) = (x + signum dx,     y + signum dy * b)
---       yxStep b (x, y) = (x + signum dx * b, y + signum dy)
---       (p, q, step) | abs dx > abs dy = (abs dy, abs dx, xyStep)
---                    | otherwise       = (abs dx, abs dy, yxStep)
---       walk w xy = xy : walk (tail w) (step (head w) xy)
---   in  zip (walk (balancedWord p q 0) (x0, y0)) [1,1..]
 
 -- | A raster for the polyline with vertices vs.
 -- Antialias if smooth is true.
