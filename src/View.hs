@@ -121,13 +121,12 @@ bresenHam dx dy
 -- prop> lineRaster False a b == polyLineRaster False [a, b]
 
 polyLineRaster' :: Smooth -> [Coord] -> Raster
-polyLineRaster' z [p1,p2] = lineRaster z p1 p2
 polyLineRaster' z (p1:p2:ps) = lineRaster z p1 p2 ++ polyLineRaster' z (p2:ps)
 polyLineRaster' _ [] = []
 polyLineRaster' _ [_] = []
 
 polyLineRaster:: Smooth -> [Coord] -> (Smooth -> [Coord] -> Raster) -> Raster
-polyLineRaster z p fun = lineRaster z (head p) (last p) ++ polyLineRaster' z p
+polyLineRaster z p _ = lineRaster z (head p) (last p) ++ polyLineRaster' z p
 
 -- polyLineRaster' z p = lineRaster z (head p) (last p)
 
