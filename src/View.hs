@@ -60,7 +60,7 @@ shapeToRaster z s shape =
 
 polygonCord :: Resolution -> [Point] -> [Coord]
 polygonCord z [] = []
-polygonCord z (p:ps) = pointToCoord z p: (polygonCord z ps)
+polygonCord z (p:ps) = pointToCoord z p: polygonCord z ps
 -- | A raster for the point p
 -- Examples:
 -- >>> pointRaster (1,1)
@@ -120,7 +120,8 @@ bresenHam dx dy
 --
 -- prop> lineRaster False a b == polyLineRaster False [a, b]
 polyLineRaster :: Smooth -> [Coord] -> Raster
-polyLineRaster = undefined -- TODO
+polyLineRaster z [] = []
+polyLineRaster z (p1:p2:ps) = lineRaster (z p1 p2)++polyLineRaster (z ps)
 
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
 -- Antialias if smooth is true.
