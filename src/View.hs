@@ -54,7 +54,7 @@ shapeToRaster z s shape =
     Point p1 -> pointRaster $ pointToCoord z p1
     Rectangle p1 p2 -> rectangleRaster (pointToCoord z p1) (pointToCoord z p2)
     Line p1 p2 -> lineRaster s (pointToCoord z p1) (pointToCoord z p2)
-    Polygon p -> polyLineRaster s (polygonCord z p)
+    Polygon p -> polyLineRaster s (polygonCord z p) polyLineRaster'
     -- TODO: add cases for rectangles, lines, polygons, and circles
     _ -> []
 
@@ -119,12 +119,17 @@ bresenHam dx dy
 -- [((0,0),1.0),((0,1),1.0),((1,1),1.0)]
 --
 -- prop> lineRaster False a b == polyLineRaster False [a, b]
-polyLineRaster :: Smooth -> [Coord] -> Raster
-polyLineRaster _ [] = []
-polyLineRaster z (p1:p2:ps) = polyHeadnLast++lineRaster z p1 p2 ++ polyLineRaster z (p2:ps)
 
-polyHeadnLast::[Coord] -> Raster
-polyHeadnLast (p1:p2:ps) = lineRaster (head(p1:p2:ps)) (last(p1:p2:ps))
+polyLineRaster' :: Smooth -> [Coord] -> Raster
+polyLineRaster' z [p1,p2] = lineRaster z p1 p2
+polyLineRaster' z (p1:p2:ps) = lineRaster z p1 p2 ++ polyLineRaster' z (p2:ps)
+polyLineRaster' _ [] = []
+polyLineRaster' _ [_] = []
+
+polyLineRaster:: Smooth -> [Coord] -> (Smooth -> [Coord] -> Raster) -> Raster
+polyLineRaster z p fun = lineRaster z (head p) (last p) ++ polyLineRaster' z p
+
+-- polyLineRaster' z p = lineRaster z (head p) (last p)
 
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
 -- Antialias if smooth is true.
