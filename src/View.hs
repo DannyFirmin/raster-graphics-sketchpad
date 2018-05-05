@@ -3,6 +3,7 @@ module View where
 
 import CodeWorld hiding (Point)
 import Data.Text (pack)
+import Data.List
 import Model
 
 -- a pixel coordinate is a pair of Int
@@ -55,7 +56,7 @@ shapeToRaster z s shape =
     Rectangle p1 p2 -> rectangleRaster (pointToCoord z p1) (pointToCoord z p2)
     Line p1 p2 -> lineRaster s (pointToCoord z p1) (pointToCoord z p2)
     Polygon p -> polyLineRaster s (polygonCord z p) polyLineRaster'
-    -- TODO: add cases for rectangles, lines, polygons, and circles
+    Circle p1 p2 -> circleRaster s (pointToCoord z p1) (pointToCoord z p2)
     _ -> []
 
 polygonCord :: Resolution -> [Point] -> [Coord]
@@ -136,4 +137,38 @@ polyLineRaster z p _ = lineRaster z (head p) (last p) ++ polyLineRaster' z p
 -- >>> sort $ circleRaster False (0,0) (0,1)
 -- [((-1,0),1.0),((0,-1),1.0),((0,1),1.0),((1,0),1.0)]
 circleRaster :: Smooth -> Coord -> Coord -> Raster
-circleRaster = undefined -- TODO
+circleRaster z (x0,y0) (x1,y1) = zip ((x0, y0 + r) : (x0, y0 - r) : (x0 + r, y0) : (x0 - r, y0) : points) [1,1..]
+  where
+  points = concatMap generatePoints $ unfoldr step (1-r,1,(-2)*r,0,r)
+  r = isqrt((x1-x0)^2 + (y1-y0)^2)
+  generatePoints (x, y)
+          = [(xop x0 x', yop y0 y') | (x', y') <- [(x, y), (y, x)], xop <- [(+), (-)], yop <- [(+), (-)]]
+  step (f,dx,dy,x,y) | x >= y = Nothing
+                     | otherwise = Just ((x+1,y'),(f',dx+2,dy',x+1,y'))
+                       where
+                       (f',dy',y')|f >=0 = (f+dy'+(dx+2),dy+2,y-1)
+                                  |otherwise = (f+dx,dy,y)
+
+isqrt:: Int -> Int
+isqrt n = floor (sqrt (fromIntegral n))
+
+--   r = sqrt((x1-x0)^2 + (y1-y0)^2)
+--   d = 1.25 - r
+--   accumulate :: Integer -> Integer
+
+
+
+-- lineRaster :: Smooth -> Coord -> Coord -> Raster
+-- lineRaster _ (x1,y1) (x2,y2) = zip [(x1+x,y1+y) | (x,y) <- bresenHam dx dy][1,1..]
+--   where dx= x2 - x1; dy= y2 - y1
+--
+-- bresenHam :: Integral a => a -> a -> [(a, a)]
+-- bresenHam dx dy
+--     | dx  <  0  = [(-x, y) | (x, y) <- bresenHam (abs dx) dy]
+--     | dy <  0  = [(x, -y) | (x, y) <- bresenHam dx (abs dy)]
+--     | dy > dx = [(x,  y) | (y, x) <- bresenHam dy dx]
+--     | otherwise  = zip [0..dx] (map fst (iterate step (0, dx `div` 2)))
+--     where
+--         step (y, e)
+--             | e-dy < 0 = (y + 1, (e-dy) + dx)
+--             | otherwise  = (y, e-dy)
