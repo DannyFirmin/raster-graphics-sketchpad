@@ -138,15 +138,18 @@ polyLineRaster z p = lineRaster z (head p) (last p) ++ polyLineRaster' z p
 circleRaster :: Smooth -> Coord -> Coord -> Raster
 circleRaster z (x0,y0) (x1,y1) = zip ((x0, y0 + r) : (x0, y0 - r) : (x0 + r, y0) : (x0 - r, y0) : points) [1,1..]
   where
-  points = concatMap generatePoints $ unfoldr step (1-r,1,(-2)*r,0,r)
-  r = isqrt((x1-x0)^2 + (y1-y0)^2)
-  generatePoints (x, y)
-          = [(xop x0 x', yop y0 y') | (x', y') <- [(x, y), (y, x)], xop <- [(+), (-)], yop <- [(+), (-)]]
-  step (f,dx,dy,x,y) | x >= y = Nothing
-                     | otherwise = Just ((x+1,y'),(f',dx+2,dy',x+1,y'))
-                       where
-                       (f',dy',y')|f >=0 = (f+dy'+(dx+2),dy+2,y-1)
-                                  |otherwise = (f+dx,dy,y)
+  points = concatMap drawPoints $ unfoldr step (1-r,1,(-2)*r,0,r) --start value
+  r = isqrt((x1-x0)^2 + (y1-y0)^2) --square root for input int to output int
+  drawPoints (x, y)
+  -- change the sign of x and y to draws all eight octants
+          = [(xam x0 x', yam y0 y') | (x', y') <- [(x, y), (y, x)], xam <- [(+), (-)], yam <- [(+), (-)]]
+  step (d,dx,dy,x,y) | x >= y = Nothing -- Based on the pseudocode, only execute when x < y
+                     | otherwise = Just ((x+1,y'),(d',dx+2,dy',x+1,y'))
+                       where --Based on the Bresenham’s algorithm
+                       (d',dy',y')|d >=0 = (d+dy'+(dx+2),dy+2,y-1) -- if d >= 0, then d’ = F（xi + 2, yi – 1.5）= (xi + 2)2 + (yi – 1.5)2 – R2
+                                  |otherwise = (d+dx,dy,y) -- if d< 0, then d’ = F（xi + 2, yi – 0.5）= (xi + 2)2 + (yi – 0.5)2 – R2
+-- F(x, y）= x2 + y2 – R2, d = F（xi + 1, yi – 0.5）= (xi + 1)2 + (yi – 0.5)2 – R2,
+-- d0 = F(1, R – 0.5) = 1 – (R – 0.5)2 – R2 = 1.25 - R
 
 isqrt:: Int -> Int
 isqrt n = round (sqrt (fromIntegral n))
