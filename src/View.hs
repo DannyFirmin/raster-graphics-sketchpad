@@ -74,17 +74,12 @@ pointRaster p = [(p, 1)]
 -- >>> sort $ rectangleRaster (-1,-1) (1,1)
 -- [((-1,-1),1.0),((-1,0),1.0),((-1,1),1.0),((0,-1),1.0),((0,1),1.0),((1,-1),1.0),((1,0),1.0),((1,1),1.0)]
 rectangleRaster :: Coord -> Coord -> Raster
--- rectangleRaster (x1,y1) (x2,y2) = zip([x1,y1] [x2,y2])
 rectangleRaster (x1,y1) (x2,y2) =
     zip (zip [(min x1 x2)..(max x1 x2)] [y1,y1..]
   ++ zip [(min x1 x2)..(max x1 x2)] [y2,y2..]
   ++ zip [x1,x1..] [(min y1 y2)..(max y1 y2)]
   ++ zip [x2,x2..] [(min y1 y2)..(max y1 y2)]) [1,1..]
 
--- rectangleRaster (x1,y1) (x2,y2) = [((x,y),1)|x<-[x1,x1..],y<-[minimum(y1,y2)..maximum(y1,y2)]]
---   ++[((x,y),1)|x<-[x2,x2..],y<-[minimum(y1,y2)..maximum(y1,y2)]]
---   ++[((x,y),1) |x<-[minimum(x1,x2)..maximum(x1,x2)],y<-[y1,y1..]]
---   ++[((x,y),1) |x<-[minimum(x1,x2)..maximum(x1,x2)],y<-[y2,y2..]]
 
 -- | A raster for the line with end coordinates given as arguments.
 -- Antialias if smooth is true.
