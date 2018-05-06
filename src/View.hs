@@ -82,6 +82,7 @@ rectangleRaster (x1,y1) (x2,y2) =
 
 
 -- | A raster for the line with end coordinates given as arguments.
+-- Inspired from reddit fourm user rabidcow
 -- Antialias if smooth is true.
 -- Examples:
 -- >>> sort $ lineRaster False (-1,-1) (1,1)
@@ -128,6 +129,8 @@ polyLineRaster z p = lineRaster z (head p) (last p) ++ polyLineRaster' z p
 -- polyLineRaster' z p = lineRaster z (head p) (last p)
 
 -- | A raster for the circle with center (x1,y1) and intersecting (x2,y2)
+-- Inspired by pseudocode from: https://blog.csdn.net/MMogega/article/details/53055625
+-- and https://rosettacode.org/wiki/Bitmap/Midpoint_circle_algorithm#Haskell
 -- Antialias if smooth is true.
 -- Examples:
 -- >>> sort $ circleRaster False (0,0) (0,1)
