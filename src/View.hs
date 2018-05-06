@@ -55,7 +55,7 @@ shapeToRaster z s shape =
     Point p1 -> pointRaster $ pointToCoord z p1
     Rectangle p1 p2 -> rectangleRaster (pointToCoord z p1) (pointToCoord z p2)
     Line p1 p2 -> lineRaster s (pointToCoord z p1) (pointToCoord z p2)
-    Polygon p -> polyLineRaster s (polygonCord z p) polyLineRaster'
+    Polygon p -> polyLineRaster s (polygonCord z p)
     Circle p1 p2 -> circleRaster s (pointToCoord z p1) (pointToCoord z p2)
     _ -> []
 
@@ -121,8 +121,9 @@ polyLineRaster' z (p1:p2:ps) = lineRaster z p1 p2 ++ polyLineRaster' z (p2:ps)
 polyLineRaster' _ [] = []
 polyLineRaster' _ [_] = []
 
-polyLineRaster:: Smooth -> [Coord] -> (Smooth -> [Coord] -> Raster) -> Raster
-polyLineRaster z p _ = lineRaster z (head p) (last p) ++ polyLineRaster' z p
+polyLineRaster:: Smooth -> [Coord] -> Raster
+polyLineRaster z [p1,p2] = lineRaster z p1 p2
+polyLineRaster z p = lineRaster z (head p) (last p) ++ polyLineRaster' z p
 
 -- polyLineRaster' z p = lineRaster z (head p) (last p)
 
@@ -145,25 +146,4 @@ circleRaster z (x0,y0) (x1,y1) = zip ((x0, y0 + r) : (x0, y0 - r) : (x0 + r, y0)
                                   |otherwise = (f+dx,dy,y)
 
 isqrt:: Int -> Int
-isqrt n = floor (sqrt (fromIntegral n))
-
---   r = sqrt((x1-x0)^2 + (y1-y0)^2)
---   d = 1.25 - r
---   accumulate :: Integer -> Integer
-
-
-
--- lineRaster :: Smooth -> Coord -> Coord -> Raster
--- lineRaster _ (x1,y1) (x2,y2) = zip [(x1+x,y1+y) | (x,y) <- bresenHam dx dy][1,1..]
---   where dx= x2 - x1; dy= y2 - y1
---
--- bresenHam :: Integral a => a -> a -> [(a, a)]
--- bresenHam dx dy
---     | dx  <  0  = [(-x, y) | (x, y) <- bresenHam (abs dx) dy]
---     | dy <  0  = [(x, -y) | (x, y) <- bresenHam dx (abs dy)]
---     | dy > dx = [(x,  y) | (y, x) <- bresenHam dy dx]
---     | otherwise  = zip [0..dx] (map fst (iterate step (0, dx `div` 2)))
---     where
---         step (y, e)
---             | e-dy < 0 = (y + 1, (e-dy) + dx)
---             | otherwise  = (y, e-dy)
+isqrt n = round (sqrt (fromIntegral n))
